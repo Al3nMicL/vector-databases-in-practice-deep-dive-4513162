@@ -19,7 +19,7 @@ def connect_to_demo_db() -> WeaviateClient:
         auth_credentials=weaviate.auth.AuthApiKey(os.getenv("DEMO_WEAVIATE_RO_KEY")),   # Demo server read-only API key
 
         # Google AI Studio API key for queries that require it
-        # Edit this to provide your own
+        # Be sure to set `GOOGLE_API_KEY` in your environment variables
         headers={"X-Goog-Studio-Api-Key": os.getenv("GOOGLE_API_KEY")},
     )  
     return client
@@ -30,14 +30,15 @@ def connect_to_my_db() -> WeaviateClient:
     """
     Helper function to connect to your own Weaviate instance.
     To be used for data loading as well as queries.
+    Be sure to set the environment variables `WEAVIATE_CLUSTER_URL` and `WEAVIATE_API_KEY`
     """
 
     client = weaviate.connect_to_wcs(
-        # Your Weaviate URL - Edit this to match your own Weaviate instance
-        cluster_url="<YOUR_WEAVIATE_URL>",
+        # Your Weaviate URL - Edit this to match your own Weaviate instance (load cluster URL from environment variable)
+        cluster_url=os.getenv("WEAVIATE_CLUSTER_URL"),  
 
-        # Your Weaviate API Key - Edit this to match your own Weaviate instance
-        auth_credentials=weaviate.auth.AuthApiKey("<YOUR_WEAVIATE_API_KEY>"),
+        # Your Weaviate API Key - Edit this to match your own Weaviate instance (load API key from environment variable)
+        auth_credentials=weaviate.auth.AuthApiKey(os.getenv("WEAVIATE_API_KEY")),
 
         # Google AI Studio API key for queries that require it
         # Edit this to provide your own
