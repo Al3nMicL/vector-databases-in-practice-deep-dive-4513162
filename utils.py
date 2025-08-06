@@ -14,13 +14,15 @@ def connect_to_demo_db() -> WeaviateClient:
     For queries only.
     This database instance has the necessary data loaded.
     """
+    google_api_key = os.getenv("GOOGLE_API_KEY")
+    headers = {"X-Goog-Studio-Api-Key": google_api_key} if google_api_key else None
     client = weaviate.connect_to_wcs(
         cluster_url=os.getenv("DEMO_WEAVIATE_URL"),                                     # Demo server URL,
         auth_credentials=weaviate.auth.AuthApiKey(os.getenv("DEMO_WEAVIATE_RO_KEY")),   # Demo server read-only API key
 
         # Google AI Studio API key for queries that require it
         # Be sure to set `GOOGLE_API_KEY` in your environment variables
-        headers={"X-Goog-Studio-Api-Key": os.getenv("GOOGLE_API_KEY")},
+        headers=headers
     )  
     return client
     
@@ -32,24 +34,20 @@ def connect_to_my_db() -> WeaviateClient:
     To be used for data loading as well as queries.
     Be sure to set the environment variables `WEAVIATE_CLUSTER_URL` and `WEAVIATE_API_KEY` in .env
     """
-
+    google_api_key = os.getenv("GOOGLE_API_KEY")
+    headers = {"X-Goog-Studio-Api-Key": google_api_key} if google_api_key else None
     client = weaviate.connect_to_wcs(
         # Your Weaviate URL - Define this in .env to match your own Weaviate instance 
         cluster_url=os.getenv("WEAVIATE_CLUSTER_URL"),  
 
         # Your Weaviate API Key - Define this in .env to match your own Weaviate instance 
         auth_credentials=weaviate.auth.AuthApiKey(os.getenv("WEAVIATE_API_KEY")),
-
-        # Google AI Studio API key for queries that require it
-        # Edit this to provide your own
-        headers={"X-Goog-Studio-Api-Key": os.getenv("GOOGLE_API_KEY")},
+        headers=headers,
     )
-
     # # Or use a local instance - e.g. with Docker
     # client = weaviate.connect_to_local(
-    #     headers={"X-Goog-Studio-Api-Key": os.getenv("GOOGLE_API_KEY")},
+    #     headers=headers,
     # )
-
     return client
 
 
