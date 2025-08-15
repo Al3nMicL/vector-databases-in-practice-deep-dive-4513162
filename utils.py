@@ -1,7 +1,8 @@
-import weaviate
-from weaviate.client import WeaviateClient
 import os
+import weaviate
 from dotenv import load_dotenv
+from weaviate.client import WeaviateClient
+from weaviate.connect.helpers import connect_to_weaviate_cloud
 
 # Load environment variables (`DEMO_WEAVIATE_URL` and `DEMO_WEAVIATE_RO_KEY`)
 # From the provided `.env` file
@@ -27,26 +28,30 @@ def connect_to_demo_db() -> WeaviateClient:
     
 
 
-def connect_to_my_db() -> WeaviateClient:
+def connect_to_my_db():
     """
-    Helper function to connect to your own Weaviate instance.
-    To be used for data loading as well as queries.
-    Be sure to set the environment variables `WEAVIATE_CLUSTER_URL` and `WEAVIATE_API_KEY` in .env
+    Connect to your Weaviate Cloud instance using environment variables.
+    Ensure you set WEAVIATE_CLUSTER_URL and WEAVIATE_API_KEY in your .env or environment.
+    For Google modules, GOOGLE_APIKEY (or PALM_APIKEY) should also be set as an environment variable.
     """
-    google_api_key = os.getenv("GOOGLE_API_KEY")
-    headers = {"X-Goog-Studio-Api-Key": google_api_key} if google_api_key else None
-    client = weaviate.connect_to_wcs(
-        # Your Weaviate URL - Define this in .env to match your own Weaviate instance 
-        cluster_url=os.getenv("WEAVIATE_CLUSTER_URL"),  
+    # Ensure env vars are loaded if using python-dotenv
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass  # Not required, just helpful for .env support
 
-        # Your Weaviate API Key - Define this in .env to match your own Weaviate instance 
-        auth_credentials=weaviate.auth.AuthApiKey(os.getenv("WEAVIATE_API_KEY")),
-        headers=headers,
+    cluster_url = os.getenv("WEAVIATE_CLUSTER_URL")
+    api_key = os.getenv("WEAVIATE_API_KEY")
+
+    if not cluster_url or not api_key:
+        raise ValueError("WEAVIATE_CLUSTER_URL and WEAVIATE_API_KEY must be set in the environment.")
+
+    client = connect_to_weaviate_cloud(
+        cluster_url=cluster_url,
+        auth_credentials=api_key,
+        # headers parameter omitted, as generative modules need env vars for keys.
     )
-    # # Or use a local instance - e.g. with Docker
-    # client = weaviate.connect_to_local(
-    #     headers=headers,
-    # )
     return client
 
 

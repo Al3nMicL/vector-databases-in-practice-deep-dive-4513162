@@ -1,7 +1,17 @@
+import os
 import utils
 import weaviate.classes as wvc
 from weaviate.util import generate_uuid5
 import pandas as pd
+
+gkey = os.environ.get('GOOGLE_APIKEY')
+pkey = os.environ.get('PALM_APIKEY')
+if gkey:
+    print(f"[DEBUG] GOOGLE_APIKEY found, starts with: {gkey[:5]}{'*' * (len(gkey)-5)}")
+elif pkey:
+    print(f"[DEBUG] PALM_APIKEY found, starts with: {pkey[:5]}{'*' * (len(pkey)-5)}")
+else:
+    print("[DEBUG] Neither GOOGLE_APIKEY nor PALM_APIKEY set!")
 
 movie_df = pd.read_csv("data/movies_data.csv")  # Load the data
 
