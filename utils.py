@@ -1,11 +1,21 @@
 import weaviate
 from weaviate.client import WeaviateClient
 import os
+import keyring
 from dotenv import load_dotenv
 
 # Load environment variables (`DEMO_WEAVIATE_URL` and `DEMO_WEAVIATE_RO_KEY`)
 # From the provided `.env` file
 load_dotenv()
+
+SERVICE_NAME = "vector-dbs"
+
+def _get_secret(name: str) -> str | None:
+    """
+    Retrieve a secret from the OS keyring with fallback to environment variables.
+    Tries keyring first, then falls back to os.getenv().
+    """
+    return keyring.get_password(SERVICE_NAME, name) or os.getenv(name)
 
 
 def connect_to_demo_db() -> WeaviateClient:
@@ -15,12 +25,12 @@ def connect_to_demo_db() -> WeaviateClient:
     This database instance has the necessary data loaded.
     """
     client = weaviate.connect_to_wcs(
-        cluster_url=os.getenv("DEMO_WEAVIATE_URL"),                                     # Demo server URL,
-        auth_credentials=weaviate.auth.AuthApiKey(os.getenv("DEMO_WEAVIATE_RO_KEY")),   # Demo server read-only API key
+        cluster_url=_get_secret("DEMO_WEAVIATE_URL"),                                     # Demo server URL,
+        auth_credentials=weaviate.auth.AuthApiKey(_get_secret("DEMO_WEAVIATE_RO_KEY")),   # Demo server read-only API key
 
         # OpenAI API key for queries that require it
         # Edit this to provide your own
-        headers={"X-OpenAI-Api-Key": os.getenv("OPENAI_APIKEY")},
+        headers={"X-OpenAI-Api-Key": _get_secret("OPENAI_APIKEY")},
     )  
     return client
     
@@ -41,12 +51,12 @@ def connect_to_my_db() -> WeaviateClient:
 
         # OpenAI API key for queries that require it
         # Edit this to provide your own
-        headers={"X-OpenAI-Api-Key": os.getenv("OPENAI_APIKEY")},
+        headers={"X-OpenAI-Api-Key": _get_secret("OPENAI_APIKEY")},
     )
 
     # # Or use a local instance - e.g. with Docker
     # client = weaviate.connect_to_local(
-    #     headers={"X-OpenAI-Api-Key": os.getenv("OPENAI_APIKEY")}
+    #     headers={"X-OpenAI-Api-Key": _get_secret("OPENAI_APIKEY")}
     # )
 
     return client
